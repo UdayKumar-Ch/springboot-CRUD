@@ -36,3 +36,6 @@ out/
 
 ### zip file Ignoring###
 uday.zip
+
+### Ignoring bin folder###
+bin/*
