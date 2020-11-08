@@ -23,6 +23,9 @@ dependencies {
 	// PostgresSQL-specific connector for JPA
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	implementation('org.postgresql:postgresql:42.1.4')
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	
 	//implementation('org.postgresql:postgresql:9.4-1206-jdbc42')
 }

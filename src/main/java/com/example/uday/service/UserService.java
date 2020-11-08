@@ -1,31 +1,34 @@
 package com.example.uday.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.uday.dao.UserDB;
-import com.example.uday.pojo.UserInformation;
+import com.example.uday.dao.AddressDB;
+import com.example.uday.dao.UserInformationDB;
+import com.example.uday.exception.UserNotFoundException;
+import com.example.uday.pojo.Address;
 
 @Service
 public class UserService {
+	
 	@Autowired
-	private UserDB userDB;
+	private UserInformationDB userInformationDB;
 	
-	public UserInformation fetchUserInformation(long userMobileNumber) {
-		return userDB.retrieveUser(userMobileNumber);
+	@Autowired 
+	private AddressDB addressDB;
+	
+	public List<Address> getAddressByUserEmailId(String emailId){
+		return addressDB.findByUserEmailId(emailId);
 	}
 	
-	public void updateUser(UserInformation userInformation) {
-		userDB.updateUser(userInformation);
-	}
-	
-	public void deleteUser(long userId) {
-		userDB.deleteUser(userId);
-	}
-	
-	public UserInformation createUser(UserInformation userInformation) {
-		userDB.addUser(userInformation);
-		return userInformation;
+	public Address addAddressToUser(Address address, String emailId) {
+		return userInformationDB.findById(emailId).map(
+				user -> {
+					address.setUser(user);
+					return addressDB.save(address);
+				}).orElseThrow(() -> new UserNotFoundException("User not exists:"+ emailId));
 	}
 	
 }

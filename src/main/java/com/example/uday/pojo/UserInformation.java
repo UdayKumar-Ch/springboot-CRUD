@@ -1,14 +1,27 @@
 package com.example.uday.pojo;
 
-public class UserInformation {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-	private long userMobileNumber;
-	private String userName;
-	private String userEmailId;
-	private String address;
+@Entity
+@Table(name = "customers")
+public class UserInformation {
 	
+	@Id
+	@Column(name="email_id")
+	private String userEmailId;
+
+	@Column(name="mobile_number")
+	private long userMobileNumber;
+	
+	@Column(name = "user_name")
+	private String userName;
+		
 	//	This property is set to false by default. 
 	//	This is set to true if and only if user wants to deactivate his account. 
+	@Column(name="is_account_disabled")
 	private boolean isDisabled = false;
 
 	public boolean isUserDisabled() {
@@ -36,11 +49,5 @@ public class UserInformation {
 	}
 	public void setUserEmailId(String userEmailId) {
 		this.userEmailId = userEmailId;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
 	}
 }
