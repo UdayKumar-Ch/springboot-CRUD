@@ -14,7 +14,7 @@ public class UserInformation {
 	private String userEmailId;
 
 	@Column(name="mobile_number")
-	private long userMobileNumber;
+	private Long userMobileNumber;
 	
 	@Column(name = "user_name")
 	private String userName;
@@ -32,10 +32,10 @@ public class UserInformation {
 		this.isDisabled = isUserDisabled;
 	}
 
-	public long getUserMobileNumber() {
+	public Long getUserMobileNumber() {
 		return userMobileNumber;
 	}
-	public void setUserMobileNumber(long userMobileNumber) {
+	public void setUserMobileNumber(Long userMobileNumber) {
 		this.userMobileNumber = userMobileNumber;
 	}
 	public String getUserName() {

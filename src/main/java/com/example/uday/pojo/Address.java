@@ -21,7 +21,8 @@ public class Address {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long address_id;
+	@Column(name = "address_id")
+	private Long addressId;
 
 	@Column(name = "line1")
 	private String line1;
@@ -93,11 +94,11 @@ public class Address {
 	public void setStateProvince(String stateProvince) {
 		this.stateProvince = stateProvince;
 	}
-	public Long getAddress_id() {
-		return address_id;
+	public Long getAddressId() {
+		return addressId;
 	}
-	public void setAddress_id(Long address_id) {
-		this.address_id = address_id;
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
 	}
 	public UserInformation getUser() {
 		return user;
