@@ -9,19 +9,23 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.uday.pojo.Address;
-import com.example.uday.pojo.UserInformation;
+
+import com.example.uday.dao.pojo.Address;
+import com.example.uday.dao.pojo.UserInformation;
+import com.example.uday.pojo.UserAddress;
 import com.example.uday.service.UserService;
 
 @RestController
 @RequestMapping("/user")
 public class UserEndpointController {
 
+	private static final String SUCCESSFULLY_DELETED = " Successfully deleted";
+	
 	@Autowired
 	private UserService userService;
 
 	@GetMapping("/fetchuser/{userEmailId}")
-	public UserInformation getUserInformation(@PathVariable String userEmailId) {
+	public UserAddress getUserInformation(@PathVariable String userEmailId) {
 		return userService.getUserInformation(userEmailId);
 	}
 	
@@ -31,15 +35,16 @@ public class UserEndpointController {
 	}
 	
 	@PutMapping("/updateuser")
-	public boolean updateUser(@RequestBody UserInformation user) {
-		return false;
+	public UserInformation updateUser(@RequestBody UserInformation user) {
+		return userService.updateUserInformation(user);
 	}
 	
 	@DeleteMapping("/deleteuser/{userId}")
-	public long deleteUser(@PathVariable long userId) {
-		return 0l;
+	public String deleteUser(@PathVariable String userId) {
+		userService.deleteUser(userId);
+		return userId + SUCCESSFULLY_DELETED;
 	}
-	
+		
 	@PostMapping("/addaddress/{userId}")
 	public Address addAddress(@RequestBody Address address, @PathVariable String userId) {
 		return userService.addAddressToUser(address, userId);
@@ -55,4 +60,5 @@ public class UserEndpointController {
 		userService.deleteAddressById(addressId);
 		return "Successfully deleted";
 	}
+	
 }

@@ -3,17 +3,27 @@ package com.example.uday.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.example.uday.dao.AddressDB;
 import com.example.uday.dao.UserInformationDB;
+import com.example.uday.dao.pojo.Address;
+import com.example.uday.dao.pojo.UserInformation;
+import com.example.uday.exception.UserAlreadyExistedException;
 import com.example.uday.exception.UserNotFoundException;
-import com.example.uday.pojo.Address;
-import com.example.uday.pojo.UserInformation;
-import com.google.common.base.Strings;
+import com.example.uday.pojo.UserAddress;
 
 @Service
 public class UserService {
+
+	private static final String USER_NOT_FOUND = "User Not found : ";
+
+	private static final String USER_NOT_EXISTS = "User not exists:";
+
+	private static final String EMAIL_ID_ALREADY_USED = "Email Id Already Used";
+
+	private static final String USER_NOT_EXISTED_RE_CHECK = "User not existed. Please re-check user name";
 
 	@Autowired
 	private UserInformationDB userInformationDB;
@@ -26,25 +36,35 @@ public class UserService {
 	}
 
 	public UserInformation createNewUser(UserInformation userInformation) {
-		return userInformationDB.save(userInformation);
+		if (userInformationDB.findById(userInformation.getUserEmailId()).isEmpty()) {
+			return userInformationDB.save(userInformation);
+		}else {
+			throw new UserAlreadyExistedException(EMAIL_ID_ALREADY_USED);
+		}
 	}
-	
+
 	public Address addAddressToUser(Address address, String emailId) {
 		return userInformationDB.findById(emailId).map(
 				user -> {
 					address.setUser(user);
 					return addressDB.save(address);
-				}).orElseThrow(() -> new UserNotFoundException("User not exists:"+ emailId));
+				}).orElseThrow(() -> new UserNotFoundException(USER_NOT_EXISTS+ emailId));
 	}
 
-	public UserInformation getUserInformation(String userEmailId) {
+	public UserAddress getUserInformation(String userEmailId) {
 		//	Throws EntityNotFoundException If EmailId (user) not available...
 		return  userInformationDB.findById(userEmailId).map(
 				user -> {
-					return user;
-				}).orElseThrow(()-> new UserNotFoundException("User Not found : "+userEmailId));
-		
-		
+					UserAddress usad = new UserAddress();
+					usad.setDisabled(user.isUserDisabled());
+					usad.setUserEmailId(userEmailId);
+					usad.setUserMobileNumber(user.getUserMobileNumber());
+					usad.setUserName(user.getUserName());
+					usad.setUserAddress(addressDB.findByAddressEmailId(userEmailId));
+					return usad;
+				}).orElseThrow(()-> new UserNotFoundException(USER_NOT_FOUND+userEmailId));
+
+
 	}
 
 	public UserInformation updateUserInformation(UserInformation userInformation) {
@@ -55,35 +75,11 @@ public class UserService {
 						return userInformationDB.save(user);
 					}
 					return user;
-				}).orElseThrow(() -> new UserNotFoundException("User not exists:"+ userInformation.getUserEmailId()));
+				}).orElseThrow(() -> new UserNotFoundException(USER_NOT_EXISTS+ userInformation.getUserEmailId()));
 	}
 
 	public Address updateAddressByAddressId(Address toModifyAddress) {
-		Address existingAddress = addressDB.getOne(toModifyAddress.getAddressId());
-
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getLine1())) {
-			existingAddress.setLine1(toModifyAddress.getLine1());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getLine2())) {
-			existingAddress.setLine1(toModifyAddress.getLine2());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getLine3())) {
-			existingAddress.setLine1(toModifyAddress.getLine3());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getCity())) {
-			existingAddress.setLine1(toModifyAddress.getCity());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getCountry())) {
-			existingAddress.setLine1(toModifyAddress.getCountry());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getStateProvince())) {
-			existingAddress.setLine1(toModifyAddress.getStateProvince());
-		}
-		if  (!Strings.isNullOrEmpty(toModifyAddress.getPostalCode())) {
-			existingAddress.setLine1(toModifyAddress.getPostalCode());
-		}
-
-		return addressDB.save(existingAddress);
+		return addressDB.save(toModifyAddress);
 	}
 
 	public boolean deleteAddressById(Long addressId) {
@@ -91,37 +87,22 @@ public class UserService {
 		return true;
 	}
 
-	public boolean deleteAddress(Address toBeDeletedAddress) {
-		addressDB.deleteById(toBeDeletedAddress.getAddressId());
-		return true;
-	}
-	
 	public UserInformation disableUser(UserInformation userInformation) {
 		return userInformationDB.findById(userInformation.getUserEmailId()).map(
 				user -> {
 					user.setIsUserDisabled(true);
 					return userInformationDB.save(user);
-				}).orElseThrow(() -> new UserNotFoundException("User not exists:"+ userInformation.getUserEmailId()));
+				}).orElseThrow(() -> new UserNotFoundException(USER_NOT_EXISTS+ userInformation.getUserEmailId()));
 	}
-	
-	
-
-	public UserInformation disableUser(String userId) {
-		return userInformationDB.findById(userId).map(
-				user -> {
-					user.setIsUserDisabled(true);
-					return userInformationDB.save(user);
-				}).orElseThrow(() -> new UserNotFoundException("User not exists:"+ userId));
-	}
-
-	public void deleteUser(UserInformation userInformation) {
-		userInformationDB.delete(userInformation);
-	}
-	
-	
 
 	public void deleteUser(String userId) {
-		userInformationDB.deleteById(userId);
+		try {
+			List<Address> allAddress = getAddressByUserEmailId(userId);
+			addressDB.deleteAll(allAddress);
+			userInformationDB.deleteById(userId);
+		}catch (EmptyResultDataAccessException erdae) {
+			throw new UserNotFoundException(USER_NOT_EXISTED_RE_CHECK);
+		}
 	}
-	
+
 }

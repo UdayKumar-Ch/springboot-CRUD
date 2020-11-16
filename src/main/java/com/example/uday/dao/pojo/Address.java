@@ -1,4 +1,4 @@
-package com.example.uday.pojo;
+package com.example.uday.dao.pojo;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
